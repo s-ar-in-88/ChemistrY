@@ -1,0 +1,380 @@
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Dalla materia alle particelle: chimica interattiva</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+:root{--bg:#f1f5f8;--card:#fff;--ink:#14283c;--mute:#556675;--line:#c9d6e0;--a:#0f8b8d;--b:#d1495b;--c:#c98f00;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1a26;--card:#162636;--ink:#e6eef5;--mute:#9db0c0;--line:#2b4054;--a:#3cc4c6;--b:#ff7d8d;--c:#f2c14e;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0e1a26;--card:#162636;--ink:#e6eef5;--mute:#9db0c0;--line:#2b4054;--a:#3cc4c6;--b:#ff7d8d;--c:#f2c14e;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "Avenir Next","Segoe UI",system-ui,sans-serif}
+main{max-width:760px;margin:0 auto;padding:20px 16px 48px}
+h1{font-size:2rem;margin:0 0 4px;letter-spacing:-.02em}
+h2{font-size:1.3rem;margin:0 0 6px}
+.sub{color:var(--mute);margin:0 0 16px}
+nav{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+.tab{font:inherit;padding:8px 12px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;cursor:pointer}
+.tab[aria-selected="true"]{border-color:var(--a);box-shadow:inset 0 -3px 0 var(--a)}
+.tab.ok::after{content:" ✓";color:var(--a);font-weight:700}
+#cnt{margin-left:auto;align-self:center;color:var(--mute);font-size:.9rem}
+.card{background:var(--card);border:1.5px solid var(--line);border-radius:10px;padding:14px;margin:12px 0}
+.q{font-weight:600;margin:0 0 8px}
+.opt{display:block;width:100%;text-align:left;font:inherit;color:var(--ink);background:transparent;border:1.5px solid var(--line);border-radius:8px;padding:8px 10px;margin:6px 0;cursor:pointer}
+.opt:hover,.tab:hover{border-color:var(--a)}
+.opt.good{border-color:var(--a);background:color-mix(in srgb,var(--a) 18%,var(--card))}
+.opt.bad{border-color:var(--b);background:color-mix(in srgb,var(--b) 14%,var(--card))}
+.opt.sel{outline:2px solid var(--a)}
+.row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:6px}
+.fb{margin:8px 0 0;color:var(--mute);min-height:1.2em}
+canvas{width:100%;height:auto;display:block;border-radius:8px}
+input[type=range]{width:100%;accent-color:var(--a)}
+button:focus-visible,input:focus-visible{outline:3px solid var(--c);outline-offset:2px}
+.pt{overflow-x:auto}
+#grid{display:grid;grid-template-columns:repeat(18,1fr);gap:3px;min-width:560px}
+#grid button{font:inherit;color:var(--ink);border:1px solid var(--line);border-radius:5px;padding:2px 0;cursor:pointer;display:flex;flex-direction:column;align-items:center;line-height:1.15;background:var(--card)}
+#grid small{font-size:.65rem;color:var(--mute)}
+.big{font-weight:600;font-size:1.05rem}
+:root{--k0:#2f6fd0;--k1:#7a4fc4;--k2:#26793a;--k3:#b85a0a}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--k0:#6ea8ff;--k1:#b494f0;--k2:#6fcf7d;--k3:#ffa65c}}
+:root[data-theme="dark"]{--k0:#6ea8ff;--k1:#b494f0;--k2:#6fcf7d;--k3:#ffa65c}
+.k0{color:var(--k0)}.k1{color:var(--k1)}.k2{color:var(--k2)}.k3{color:var(--k3)}
+.opt.k{border-left-width:6px}
+.sw{display:inline-block;width:.8em;height:.8em;border-radius:50%;margin-right:.4em}
+.nu{display:inline-flex;flex-direction:column;font-size:.6em;line-height:1.05;vertical-align:middle;margin-right:3px;text-align:right}
+.nu sup,.nu sub{position:static;font-size:1em;line-height:1.05}
+#nt{font-size:1.8rem;margin:.3em 0}
+.hb{border:1.5px solid var(--line);border-radius:10px;padding:10px;text-align:center}
+.hb .opt{text-align:center;margin-bottom:0}
+</style></head>
+<body><main>
+<h1>Dalla materia alle particelle</h1>
+<p class="sub">Quattro lezioni di chimica: prevedi, prova, scopri. Ogni risposta esatta vale un timbro.</p>
+<nav role="tablist"><button class="tab" aria-selected="true">Stati della materia</button><button class="tab">Miscele</button><button class="tab">Atomi</button><button class="tab">Tavola periodica</button><button class="tab">Elementi, ioni, isotopi</button><button class="tab">Legami</button><span id="cnt">0 / 6 timbri</span></nav>
+
+<section class="lesson">
+<h2>Cosa succede alla temperatura mentre cambia lo stato?</h2>
+<p class="sub">Il ghiaccio parte da −40 °C e riceve calore in modo costante.</p>
+<div class="card" id="q1"></div>
+<div class="card"><canvas id="c1" width="640" height="280" aria-label="Particelle e grafico temperatura-calore"></canvas>
+<label for="s1">Calore fornito</label><input id="s1" type="range" min="0" max="260" value="0">
+<p class="big" id="t1"></p></div>
+<div class="card"><p class="q">Calore e temperatura non sono la stessa cosa</p>
+<p><b>Calore</b>: energia che passa da un corpo più caldo a uno più freddo, misurata in joule (J). <b>Temperatura</b>: misura di quanto sono agitate, in media, le particelle. Nei tratti piatti del grafico il calore continua a entrare ma la temperatura non cambia: l’energia serve a cambiare stato.</p>
+<p><b>Scala Kelvin</b>: K = °C + 273,15. Lo zero assoluto (0 K, cioè −273,15 °C) è il limite in cui l’agitazione delle particelle è minima. Un intervallo di 1 °C vale quanto uno di 1 K: l’acqua fonde a 273,15 K e bolle a 373,15 K.</p></div>
+<div class="card" id="q1b"></div>
+</section>
+
+<section class="lesson" hidden>
+<h2>Sostanze pure e miscele</h2>
+<div class="card"><p class="q">Prima: riconosci cosa hai davanti</p>
+<p><b>Sostanza pura</b>: composizione fissa e proprietà costanti, come punto di fusione e di ebollizione. Può essere un <b class="k0">elemento</b> (un solo tipo di atomo, come O₂ o Fe) o un <b class="k1">composto</b> (atomi diversi legati in rapporto fisso, come H₂O o NaCl). Un composto si scompone solo con reazioni chimiche.</p>
+<p><b>Miscela</b>: più sostanze mescolate, in quantità variabile, che conservano le proprie proprietà e si separano con metodi fisici. È <b class="k2">omogenea</b> se vedi una sola fase (aria, acqua e sale sciolto), <b class="k3">eterogenea</b> se vedi più fasi (acqua e olio, sabbia e acqua).</p><canvas id="c2" width="640" height="185" aria-label="Particelle di elemento, composto, miscela omogenea e miscela eterogenea"></canvas><p class="fb">Elemento: atomi tutti uguali. Composto: atomi diversi legati in molecole tutte uguali. Miscela: molecole diverse, mescolate (omogenea) o in zone separate (eterogenea). In ogni riquadro i colori indicano i tipi di atomo.</p></div>
+<div class="card" id="cls"><p class="q">Classifica: scegli un materiale, poi la categoria. Il colore indica dove l’hai messo.</p><div class="row" id="ci"></div><div class="row" id="ct" style="margin-top:10px"></div><p class="fb" id="cres" aria-live="polite"></p></div>
+<p class="sub" style="margin-top:16px">Poi: scegli una miscela e prevedi il metodo che la separa.</p>
+<div class="card" id="lab"><div class="row" id="mix"></div><p class="q" style="margin-top:12px">Metodo di separazione</p><div class="row" id="met"></div><p class="fb" id="res" aria-live="polite"></p></div>
+</section>
+
+<section class="lesson" hidden>
+<h2>Com’è fatto un atomo?</h2>
+<p class="sub">Dall’idea di Democrito al modello di Bohr. Cambia modello e prova a sparare particelle α.</p>
+<div class="card"><div class="row" id="mods"></div>
+<canvas id="c3" width="640" height="300" aria-label="Modello atomico"></canvas>
+<p class="fb" id="d3"></p><button class="opt" id="b3" style="width:auto">Spara particelle α</button><p class="fb">I disegni non sono in scala.</p></div>
+<div class="card"><p class="q">Particelle e cariche</p>
+<p><span class="sw" style="background:var(--b)"></span><b>Protone</b>: carica +1, massa 1 u, nel nucleo.<br><span class="sw" style="background:var(--mute)"></span><b>Neutrone</b>: carica 0, massa 1 u, nel nucleo.<br><span class="sw" style="background:var(--a)"></span><b>Elettrone</b>: carica −1, massa circa 1/1836 u, intorno al nucleo.</p>
+<p class="fb">u = unità di massa atomica. Nei disegni il nucleo (protoni e neutroni) è corallo e gli elettroni sono verde acqua. In un atomo neutro protoni ed elettroni sono in numero uguale.</p></div>
+<div class="card"><p class="q">Quanto è grande il nucleo?</p>
+<p>Il nucleo è da 10.000 a 100.000 volte più piccolo dell’atomo. Se l’atomo fosse un campo da calcio (circa 100 m), il nucleo sarebbe un granello di sabbia (circa 1 mm) al centro: un rapporto di 1 a 100.000. Eppure nel nucleo si trova oltre il 99,9% della massa dell’atomo. Il resto è quasi tutto spazio vuoto, come intuì Rutherford.</p></div>
+<div class="card" id="q3"></div>
+</section>
+
+<section class="lesson" hidden>
+<h2>Cosa cambia lungo la tavola periodica?</h2>
+<p class="sub">Primi 20 elementi. Tocca un elemento per i dettagli.</p>
+<div class="card"><div class="row" id="props" style="margin-bottom:10px"></div><p class="fb" id="pdef" style="margin:0 0 10px"></p><div class="pt"><div id="grid"></div></div><p class="fb" id="info">Nessun elemento selezionato.</p></div>
+<div class="card" id="q4"></div>
+<div class="card"><p class="q">Alla fine: l’ottetto</p>
+<p><b>Elettroni di valenza</b>: gli elettroni del livello più esterno di un atomo. Sono quelli che partecipano ai legami chimici; il loro numero si vede toccando un elemento nella tabella.</p>
+<p><b>Ottetto</b>: configurazione elettronica con 8 elettroni di valenza. È la configurazione dei gas nobili (per H e He bastano 2 elettroni) ed è particolarmente stabile: per questo i gas nobili reagiscono pochissimo.</p>
+<p><b>Regola dell’ottetto</b>: gli altri atomi tendono a raggiungere questa configurazione perdendo, acquistando o mettendo in comune elettroni. Perdere pochi elettroni (come il sodio, con 1) o acquistarne pochi (come il cloro, a cui ne manca 1) permette di arrivare all’ottetto: per questo alcalini e alogeni sono così reattivi.</p></div>
+<div class="card" id="q4b"></div>
+</section>
+<section class="lesson" hidden>
+<h2>Elementi, ioni e isotopi</h2>
+<p class="sub">Cambia una particella alla volta e osserva cosa succede all’atomo.</p>
+<div class="card"><p class="q">Tre numeri, tre cose diverse</p>
+<p><b>Protoni (Z)</b>: il numero atomico. Se Z cambia, <b>cambia l’elemento</b>: 6 protoni sono carbonio, 7 sono azoto.</p>
+<p><b>Neutroni</b>: se cambiano, cambia il numero di massa A = Z + neutroni, ma l’elemento resta lo stesso. Sono gli <b>isotopi</b>: stessi protoni, stesse proprietà chimiche, massa diversa (per esempio idrogeno-1, deuterio e trizio; carbonio-12 e carbonio-14).</p>
+<p><b>Elettroni</b>: se cambiano, l’elemento e la massa restano praticamente uguali, ma l’atomo diventa uno <b>ione</b>. Se perde elettroni è un <b>catione</b> (carica positiva, come Na⁺); se ne acquista è un <b>anione</b> (carica negativa, come Cl⁻).</p></div>
+<div class="card"><div class="row" id="vw" style="margin-bottom:10px"></div><div class="row" id="pre" style="margin-bottom:10px"></div>
+<canvas id="c8" width="640" height="260" aria-label="Atomo con protoni, neutroni ed elettroni"></canvas><div id="v8" style="display:none;height:320px;touch-action:none;cursor:grab;border-radius:8px;overflow:hidden;border:1.5px solid var(--line)"></div><p class="fb" id="vm8"></p>
+<p class="fb"><span class="sw" style="background:var(--b)"></span>protone <span class="sw" style="background:var(--mute)"></span>neutrone <span class="sw" style="background:var(--a)"></span>elettrone</p>
+<label for="sz">Protoni (Z): <b id="vz"></b></label><input id="sz" type="range" min="1" max="20" value="6">
+<label for="sn">Neutroni: <b id="vn"></b></label><input id="sn" type="range" min="0" max="24" value="6">
+<label for="se">Elettroni: <b id="ve"></b></label><input id="se" type="range" min="0" max="23" value="6">
+<p class="big" id="nt"></p><p class="fb" id="ntx"></p></div>
+<div class="card"><p class="q">Gli isotopi dell’idrogeno</p>
+<p>Il simbolo completo di un nuclide ha il <b>numero di massa A</b> in alto a sinistra e il <b>numero atomico Z</b> in basso a sinistra. I neutroni si ricavano con A − Z. L’idrogeno ha tre isotopi: Z è sempre 1, cambia solo il numero di neutroni.</p>
+<div class="row" id="hi"></div>
+<p class="fb">Le abbondanze sono quelle approssimate in natura.</p></div>
+<div class="card" id="q8b"></div>
+<div class="card" id="q8"></div>
+</section>
+<section class="lesson" hidden>
+<h2>Come si legano gli atomi?</h2>
+<p class="sub">Gli atomi si legano per raggiungere l’ottetto. Il tipo di legame dipende da come si comportano gli elettroni.</p>
+<div class="card"><p class="q">Tre tipi di legame</p>
+<canvas id="c5" width="640" height="185" aria-label="Legame ionico, covalente e metallico"></canvas>
+<p><b>Ionico</b>: tra un metallo e un non metallo (NaCl). Un atomo cede elettroni e l’altro li acquista: gli ioni di carica opposta si attirano.</p>
+<p><b>Covalente</b>: tra non metalli (Cl₂, H₂O). Gli atomi mettono in comune coppie di elettroni.</p>
+<p><b>Metallico</b>: tra atomi di metalli (Fe, Cu). Gli ioni positivi sono immersi in elettroni liberi di muoversi, per questo i metalli conducono la corrente.</p></div>
+<div class="card"><p class="q">Polarità del legame covalente</p>
+<p>Gli elettroni condivisi sono attratti di più dall’atomo più elettronegativo. Se la differenza di elettronegatività (ΔEN) è quasi nulla il legame è <b>apolare</b>. Se è media è <b>polare</b>: sull’atomo più elettronegativo c’è una carica parziale negativa (δ−) e sull’altro una positiva (δ+). Se è molto grande gli elettroni passano da un atomo all’altro e il legame è <b>ionico</b>. Scegli un legame:</p>
+<div class="row" id="bl"></div>
+<canvas id="c6" width="640" height="130" aria-label="Nuvola elettronica spostata verso l’atomo più elettronegativo"></canvas>
+<p class="big" id="bt"></p><p class="fb">Soglie indicative: ΔEN sotto 0,4 apolare; tra 0,4 e 1,7 polare; sopra 1,7 ionico.</p></div>
+<div class="card"><p class="q">La struttura dell’acqua</p>
+<canvas id="c7" width="640" height="190" aria-label="Molecola d’acqua con cariche parziali e legami a idrogeno"></canvas>
+<p>Nell’acqua l’ossigeno (EN 3,44) attira gli elettroni di legame più dell’idrogeno (2,20): attorno all’ossigeno la densità di carica è negativa (δ−), attorno agli idrogeni è positiva (δ+). La molecola è piegata (circa 104,5°), quindi le cariche parziali non si annullano: è una molecola <b>polare</b>, con un lato negativo e uno positivo.</p>
+<p>Il lato δ+ di una molecola attira il lato δ− di un’altra: sono i legami a idrogeno (linee tratteggiate), forze tra molecole. Per questo l’acqua ha una temperatura di ebollizione alta e, essendo polare, scioglie i composti ionici come NaCl: le molecole circondano gli ioni.</p></div>
+<div class="card"><p class="q">In 3D: ruota la molecola e il cristallo</p>
+<div class="row" id="m3" style="margin-bottom:10px"></div>
+<div id="v3" style="height:320px;touch-action:none;cursor:grab;border-radius:8px;overflow:hidden;border:1.5px solid var(--line)"></div>
+<p class="fb" id="d3d"></p><p class="fb">Trascina con il mouse o con il dito per ruotare. Le dimensioni non sono in scala.</p></div>
+<div class="card" id="q5"></div>
+</section>
+</main>
+<script>
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const cv=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const dot=(g,x,y,r,col)=>{g.fillStyle=col;g.beginPath();g.arc(x,y,r,0,7);g.fill()};
+const done=[0,0,0,0,0,0];let cur=0;
+function stamp(i){done[i]=1;$$('.tab')[i].classList.add('ok');$('#cnt').textContent=done.filter(Boolean).length+' / 6 timbri'}
+function quiz(id,i,q){const el=$(id);
+ el.innerHTML='<p class="q">'+q.t+'</p>'+q.o.map((o,k)=>'<button class="opt" data-k="'+k+'">'+o+'</button>').join('')+'<p class="fb" aria-live="polite"></p>';
+ el.onclick=e=>{const b=e.target.closest('.opt');if(!b)return;const fb=el.querySelector('.fb');
+  if(+b.dataset.k===q.c){b.classList.add('good');fb.textContent='Esatto. '+q.e;q.g?q.g():stamp(i)}
+  else{b.classList.add('bad');fb.textContent='Non proprio. '+q.h}}}
+$$('.tab').forEach((t,k)=>t.onclick=()=>{cur=k;$$('.tab').forEach((x,j)=>x.setAttribute('aria-selected',j===k));$$('.lesson').forEach((s,j)=>s.hidden=j!==k)});
+
+/* Lezione 1: stati della materia */
+const h1=[0,0];
+quiz('#q1',0,{g:()=>{h1[0]=1;if(h1[1])stamp(0)},t:'Mentre il ghiaccio fonde a 0 °C e continui a scaldarlo, la temperatura…',o:['continua a salire','resta a 0 °C finché non è tutto sciolto','scende leggermente'],c:1,
+ e:'Il calore fornito serve a rompere i legami tra le particelle, non ad aumentarne l’agitazione. Succede lo stesso a 100 °C durante l’ebollizione.',h:'Guarda il grafico muovendo il cursore: cosa fa la curva durante la fusione?'});
+quiz('#q1b',0,{g:()=>{h1[1]=1;if(h1[0])stamp(0)},t:'L’acqua è un’eccezione. Rispetto all’acqua liquida, il ghiaccio ha una densità…',o:['maggiore, quindi affonda','minore, quindi galleggia','uguale'],c:1,e:'Quasi tutte le sostanze solide sono più dense del proprio liquido, l’acqua no. Nel ghiaccio le molecole formano un reticolo esagonale con molto spazio vuoto (0,92 g/cm³ contro 1,00 g/cm³). Per questo il ghiaccio galleggia e i laghi gelano dalla superficie: sotto la crosta di ghiaccio la vita continua. L’acqua liquida è più densa a 4 °C.',h:'Pensa a un iceberg: affonda o galleggia?'});
+const c1=$('#c1'),g1=c1.getContext('2d'),N=40;
+const seg=[[40,-40,0],[20,0,0],[100,0,100],[60,100,100],[40,100,140]];
+const lbl=['Solido','Fusione: solido e liquido insieme','Liquido','Ebollizione: liquido e gas insieme','Gas'];
+function info(E){let s=0;for(let k=0;k<5;k++){const[l,a,b]=seg[k];if(E<=s+l||k===4){const f=Math.min(1,(E-s)/l);return{k,f,T:a+(b-a)*f}}s+=l}}
+const P=Array.from({length:N},(_,i)=>({hx:60+(i%8)*40,hy:150+Math.floor(i/8)*28,x:0,y:0,vx:0,vy:0,s:-1}));
+function draw1(t){const E=+$('#s1').value,I=info(E);g1.clearRect(0,0,640,280);
+ const ink=cv('--ink'),line=cv('--line'),mute=cv('--mute'),cols=[cv('--a'),cv('--c'),cv('--b')];
+ g1.strokeStyle=line;g1.lineWidth=1.5;g1.strokeRect(6,6,388,268);
+ P.forEach((p,i)=>{const r=i/N<I.f;const s=I.k===0?0:I.k===1?(r?1:0):I.k===2?1:I.k===3?(r?2:1):2;
+  if(s!==p.s){if(s>0){const v=s===1?1.4:3.2,an=Math.random()*6.28;p.vx=v*Math.cos(an);p.vy=v*Math.sin(an)}p.s=s}
+  if(s===0){const m=1+(I.T+40)/40*2;p.x=p.hx+Math.sin(t/90+i)*m;p.y=p.hy+Math.cos(t/110+i*2)*m}
+  else{const top=s===1?150:12;p.x+=p.vx;p.y+=p.vy;if(p.x<12||p.x>388)p.vx*=-1;if(p.y<top||p.y>268)p.vy*=-1;p.x=Math.min(388,Math.max(12,p.x));p.y=Math.min(268,Math.max(top,p.y))}
+  dot(g1,p.x,p.y,7,cols[s])});
+ const gx=e=>430+e/260*200,gy=T=>260-(T+40)/180*240;
+ g1.strokeStyle=mute;g1.beginPath();g1.moveTo(430,20);g1.lineTo(430,260);g1.lineTo(630,260);g1.stroke();
+ g1.strokeStyle=ink;g1.lineWidth=2;g1.beginPath();[0,40,60,160,220,260].forEach((e,k)=>{const T=info(e).T;k?g1.lineTo(gx(e),gy(T)):g1.moveTo(gx(e),gy(T))});g1.stroke();
+ dot(g1,gx(E),gy(I.T),6,cv('--b'));g1.fillStyle=mute;g1.font='12px system-ui';g1.fillText('T (°C)',436,16);g1.fillText('calore fornito',545,276);
+ $('#t1').textContent=Math.round(I.T)+' °C = '+(I.T+273.15).toFixed(1).replace('.',',')+' K · '+lbl[I.k]}
+
+/* Lezione 2: miscele */
+const Mt=['Filtrazione','Decantazione','Evaporazione','Cromatografia'];
+const M=[['Sale in acqua (miscela omogenea)',[2],'L’acqua evapora e il sale resta: i due componenti hanno punti di ebollizione molto diversi.','Il sale è disciolto in particelle minuscole: passano nel filtro e non si depositano.'],
+['Sabbia e acqua (miscela eterogenea)',[0,1],'La sabbia è un solido insolubile: si trattiene sul filtro o si deposita sul fondo.','Questo metodo non sfrutta il fatto che la sabbia è un solido non disciolto.'],
+['Olio e acqua (miscela eterogenea)',[1],'I due liquidi non si mescolano e hanno densità diverse: l’olio galleggia e si separa.','Qui conta la non miscibilità e la differenza di densità, che questo metodo non usa.'],
+['Inchiostro nero (miscela omogenea)',[3],'I pigmenti salgono sulla carta a velocità diverse e si separano in bande colorate.','L’inchiostro contiene più coloranti insieme: serve un metodo che li distingua per come si muovono.']];
+let sm=0;const found=new Set();
+function r2(){$('#mix').innerHTML=M.map((m,k)=>'<button class="opt k'+(k===sm?' sel':'')+(found.has(k)?' good':'')+'" style="border-left-color:var(--k'+(/eterogenea/.test(m[0])?3:2)+')" data-m="'+k+'">'+m[0]+'</button>').join('');
+ $('#met').innerHTML=Mt.map((m,k)=>'<button class="opt" data-t="'+k+'">'+m+'</button>').join('')}
+$('#lab').onclick=e=>{const b=e.target.closest('button');if(!b)return;
+ if(b.dataset.m!==undefined){sm=+b.dataset.m;$('#res').textContent='';r2()}
+ else if(b.dataset.t!==undefined){const m=M[sm],t=+b.dataset.t;
+  if(m[1].includes(t)){found.add(sm);$('#res').textContent='Funziona. '+m[2]+(found.size<4?'':' Le quattro miscele sono risolte.');if(found.size===4){sepDone=1;chk2()}}
+  else $('#res').textContent='Non funziona. '+m[3];r2()}};
+r2();
+
+const CT=['Elemento','Composto','Miscela omogenea','Miscela eterogenea'];
+const CI=[['Ossigeno (O₂)',0,'Un solo tipo di atomo: è un elemento.'],['Ferro',0,'Un solo tipo di atomo: è un elemento.'],['Acqua distillata',1,'Atomi di idrogeno e ossigeno legati in rapporto fisso (H₂O): è un composto.'],['Sale da cucina (NaCl)',1,'Sodio e cloro legati in rapporto fisso: è un composto.'],['Aria',2,'Gas diversi mescolati in una sola fase: miscela omogenea.'],['Acqua e sale sciolto',2,'Il sale non si vede: una sola fase, miscela omogenea.'],['Acqua e olio',3,'Si vedono due fasi distinte: miscela eterogenea.'],['Sabbia e acqua',3,'Si vedono due fasi distinte: miscela eterogenea.']];
+let si=0,sepDone=0,clsDone=0;const okc=new Set();
+function chk2(){if(sepDone&&clsDone)stamp(1)}
+function r2b(){$('#ci').innerHTML=CI.map((m,k)=>'<button class="opt'+(k===si?' sel':'')+(okc.has(k)?' k':'')+'" data-m="'+k+'"'+(okc.has(k)?' style="border-color:var(--k'+m[1]+');background:color-mix(in srgb,var(--k'+m[1]+') 20%,var(--card))"':'')+'>'+m[0]+'</button>').join('');
+ $('#ct').innerHTML=CT.map((m,k)=>'<button class="opt k" style="border-left-color:var(--k'+k+')" data-t="'+k+'">'+m+'</button>').join('')}
+$('#cls').onclick=e=>{const b=e.target.closest('button');if(!b)return;const r=$('#cres');
+ if(b.dataset.m!==undefined){si=+b.dataset.m;r.textContent='';r2b()}
+ else if(b.dataset.t!==undefined){const m=CI[si],t=+b.dataset.t;
+  if(m[1]===t){okc.add(si);r.textContent='Esatto. '+m[2]+(okc.size<8?'':' Hai classificato tutto.');if(okc.size===8){clsDone=1;chk2()}}
+  else r.textContent='Non proprio. '+(t<2&&m[1]>=2?'Un elemento o un composto è una sostanza pura, ma qui ci sono più sostanze mescolate.':m[1]<2&&t>=2?'Qui c’è una sola sostanza pura: non è una miscela.':t<2?'Pensa ai tipi di atomi: un elemento ne ha uno solo, un composto più tipi legati.':'Chiediti se a occhio vedi una fase sola o più fasi.');r2b()}};
+r2b();
+
+const g2=$('#c2').getContext('2d');
+function draw2(){g2.clearRect(0,0,640,185);let s=7;const R=()=>(s=(s*16807)%2147483647)/2147483647;
+ const A=cv('--a'),B=cv('--b'),C=cv('--c'),at=(x,y,r,c)=>dot(g2,x,y,r,c);
+ const m=(x,y,t,a)=>{const c=Math.cos(a),n=Math.sin(a);
+  if(t===0){at(x-7*c,y-7*n,7,A);at(x+7*c,y+7*n,7,A)}
+  else if(t===1){at(x,y,8,B);at(x+11*Math.cos(a+.9),y+11*Math.sin(a+.9),5,C);at(x+11*Math.cos(a-.9),y+11*Math.sin(a-.9),5,C)}
+  else{at(x-6*c,y-6*n,6,B);at(x+6*c,y+6*n,6,B)}};
+ for(let p=0;p<4;p++){const x0=6+p*158;g2.strokeStyle=cv('--k'+p);g2.lineWidth=2;g2.strokeRect(x0,6,150,144);
+  for(let i=0;i<4;i++)for(let j=0;j<4;j++){const x=x0+20+i*37+(R()-.5)*14,y=24+j*35+(R()-.5)*12,a=R()*6.28,q=R();
+   m(x,y,p===0?0:p===1?1:p===2?(q<.5?0:2):(i<2?0:1),a)}
+  if(p===3){g2.strokeStyle=cv('--line');g2.lineWidth=1.5;g2.setLineDash([4,4]);g2.beginPath();g2.moveTo(x0+75,6);g2.lineTo(x0+75,150);g2.stroke();g2.setLineDash([])}
+  g2.fillStyle=cv('--k'+p);g2.font='600 13px system-ui';g2.textAlign='center';g2.fillText(['Elemento','Composto','Miscela omogenea','Miscela eterogenea'][p],x0+75,172)}
+ g2.textAlign='left'}
+
+/* Lezione 3: modelli atomici */
+const MN=['Dalton, 1803: sfera piena','Thomson, 1904: a panettone','Rutherford, 1911: nucleare','Bohr, 1913: a livelli di energia','Democrito, circa 400 a.C.: atomi e vuoto'];
+const MD=['Sfera piena e indivisibile: nessuna struttura interna.','Carica positiva diffusa con gli elettroni incastrati dentro, come uvetta in un panettone.','Nucleo minuscolo, positivo e pesante; gli elettroni stanno lontani. L’atomo è quasi vuoto.','Gli elettroni occupano livelli di energia a distanze fisse dal nucleo.'];
+MD[4]='Tutto è fatto di atomi (“indivisibili”), eterni e in movimento, e di vuoto. È un’idea filosofica, nata senza esperimenti. Qui ne vedi uno solo, che si muove nel vuoto.';let mod=2,fire=false,A=[],fc=0;
+function setMod(k){mod=k;A=[];$('#mods').innerHTML=[4,0,1,2,3].map(j=>'<button class="opt'+(j===k?' sel':'')+'" data-j="'+j+'">'+MN[j]+'</button>').join('');$('#d3').textContent=MD[k]}
+$('#mods').onclick=e=>{const b=e.target.closest('button');if(b)setMod(+b.dataset.j)};
+$('#b3').onclick=()=>{fire=!fire;A=[];$('#b3').textContent=fire?'Ferma le particelle α':'Spara particelle α'};
+const g3=$('#c3').getContext('2d');
+function draw3(t){const cx=320,cy=150;g3.clearRect(0,0,640,300);const ink=cv('--ink'),a=cv('--a'),b=cv('--b'),line=cv('--line');
+ if(mod===4)dot(g3,cx+Math.sin(t/700)*50,cy+Math.cos(t/900)*20,60,a);
+ if(mod===0)dot(g3,cx,cy,60,a);
+ if(mod===1){g3.globalAlpha=.25;dot(g3,cx,cy,100,b);g3.globalAlpha=1;for(let k=0;k<9;k++){const an=k*.7,r=k%2?60:30+k*4;dot(g3,cx+r*Math.cos(an),cy+r*Math.sin(an),6,a)}}
+ if(mod===2){dot(g3,cx,cy,5,b);for(let k=0;k<2;k++){const an=t/700+k*3.14;dot(g3,cx+130*Math.cos(an),cy+60*Math.sin(an),6,a)}}
+ if(mod===3){dot(g3,cx,cy,8,b);g3.strokeStyle=line;g3.lineWidth=1.5;[[40,2],[80,8],[120,1]].forEach(([r,n])=>{g3.beginPath();g3.arc(cx,cy,r,0,7);g3.stroke();for(let k=0;k<n;k++){const an=t/(900+r*6)+k*6.283/n;dot(g3,cx+r*Math.cos(an),cy+r*Math.sin(an),6,a)}})}
+ if(fire&&(mod===1||mod===2)){if(++fc%4===0)A.push({x:0,y:cy+(Math.random()*2-1)*95,vx:5,vy:0,d:0});
+  A.forEach(p=>{p.x+=p.vx;p.y+=p.vy;if(!p.d&&p.x>=cx){p.d=1;const d=p.y-cy,th=mod===2?2*Math.atan(3/Math.max(Math.abs(d),.5)):(Math.random()-.5)*.03,an=th*Math.sign(d||1);p.vx=5*Math.cos(an);p.vy=5*Math.sin(an)}});
+  A=A.filter(p=>p.x>-5&&p.x<645&&p.y>-5&&p.y<305).slice(-160);A.forEach(p=>dot(g3,p.x,p.y,2.5,ink))}}
+setMod(2);
+quiz('#q3',2,{t:'Rutherford spara particelle α contro una lamina d’oro sottilissima. Che cosa osserva?',o:['Tutte attraversano la lamina senza deviare','Quasi tutte passano, ma alcune vengono deviate e poche tornano indietro','Quasi tutte rimbalzano all’indietro'],c:1,
+ e:'La maggior parte passa perché l’atomo è quasi vuoto. Le poche deviate o respinte colpiscono un nucleo piccolo, denso e positivo. Il modello di Thomson non lo spiegava.',h:'Seleziona Thomson o Rutherford e premi “Spara particelle α”, poi confronta.'});
+
+/* Lezione 4: tavola periodica */
+const EL=[['H',1,1,1,31,2.2],['He',2,18,1,28,null],['Li',3,1,2,128,.98],['Be',4,2,2,96,1.57],['B',5,13,2,84,2.04],['C',6,14,2,76,2.55],['N',7,15,2,71,3.04],['O',8,16,2,66,3.44],['F',9,17,2,57,3.98],['Ne',10,18,2,58,null],['Na',11,1,3,166,.93],['Mg',12,2,3,141,1.31],['Al',13,13,3,121,1.61],['Si',14,14,3,111,1.9],['P',15,15,3,107,2.19],['S',16,16,3,105,2.58],['Cl',17,17,3,102,3.16],['Ar',18,18,3,106,null],['K',19,1,4,203,.82],['Ca',20,2,4,176,1]];
+const PR=[['Raggio atomico',4],['Elettronegatività',5]];let pr=4;
+const PD={4:'Raggio atomico: metà della distanza tra i nuclei di due atomi legati, qui in picometri (1 pm = 10⁻¹² m). Indica quanto è grande l’atomo.',5:'Elettronegatività: capacità di un atomo di attrarre gli elettroni di un legame (scala di Pauling, massimo 3,98 per il fluoro). Per i gas nobili non è definita.'};
+function paint(){$('#pdef').textContent=PD[pr];$('#props').innerHTML=PR.map(([n,k])=>'<button class="opt'+(k===pr?' sel':'')+'" data-p="'+k+'">'+n+'</button>').join('');
+ const v=EL.map(e=>e[pr]).filter(x=>x!==null),mn=Math.min(...v),mx=Math.max(...v);
+ $('#grid').innerHTML=EL.map((e,i)=>{const x=e[pr],bg=x===null?'var(--card)':'color-mix(in srgb,var(--a) '+Math.round(12+58*(x-mn)/(mx-mn))+'%,var(--card))';
+  return '<button data-i="'+i+'" style="grid-column:'+e[2]+';grid-row:'+e[3]+';background:'+bg+'" aria-label="'+e[0]+'"><b>'+e[0]+'</b><small>'+e[1]+'</small></button>'}).join('')}
+$('#props').onclick=e=>{const b=e.target.closest('button');if(b){pr=+b.dataset.p;paint()}};
+$('#grid').onclick=e=>{const b=e.target.closest('button');if(!b)return;const x=EL[+b.dataset.i];
+ $('#info').textContent=x[0]+' (Z = '+x[1]+'): raggio ≈ '+x[4]+' pm; '+(x[2]===18?(x[1]===2?2:8):x[2]<3?x[2]:x[2]-10)+' elettroni di valenza; elettronegatività '+(x[5]===null?'non definita (gas nobile)':String(x[5]).replace('.',','))};
+paint();
+const h4=[0,0];
+quiz('#q4',3,{g:()=>{h4[0]=1;if(h4[1])stamp(3)},t:'Andando da sinistra a destra in un periodo (da Li a F), il raggio atomico…',o:['aumenta','diminuisce','resta uguale'],c:1,
+ e:'Cresce il numero di protoni ma gli elettroni restano nello stesso livello: il nucleo li attira di più e l’atomo si contrae. L’elettronegatività, invece, aumenta.',h:'Seleziona “Raggio atomico” e osserva il colore da Li a F: diventa più scuro o più chiaro?'});
+
+quiz('#q4b',3,{g:()=>{h4[1]=1;if(h4[0])stamp(3)},t:'Il cloro (gruppo 17) ha 7 elettroni di valenza. Per raggiungere l’ottetto tende a…',o:['perdere 7 elettroni','acquistare 1 elettrone','restare com’è'],c:1,e:'Gli manca un solo elettrone per averne 8: diventa lo ione Cl⁻. Essendo molto elettronegativo, attira volentieri elettroni. Il sodio (1 elettrone di valenza) fa il contrario: ne perde uno e diventa Na⁺. Insieme formano NaCl.',h:'Quanti elettroni mancano a 7 per arrivare a 8, e quanti dovresti toglierne?'});
+const NM=['Idrogeno','Elio','Litio','Berillio','Boro','Carbonio','Azoto','Ossigeno','Fluoro','Neon','Sodio','Magnesio','Alluminio','Silicio','Fosforo','Zolfo','Cloro','Argon','Potassio','Calcio'];
+const NN=[0,2,4,5,6,6,7,8,10,10,12,12,14,14,16,16,18,22,20,20];
+const PRE=[['Carbonio-12',6,6,6],['Carbonio-14',6,8,6],['Sodio → Na⁺',11,12,10],['Cloro → Cl⁻',17,18,18]];
+let z8=6,n8=6,e8=6;
+function upd8(){build8();$('#sz').value=z8;$('#sn').value=n8;$('#se').value=e8;$('#vz').textContent=z8;$('#vn').textContent=n8;$('#ve').textContent=e8;
+ const q=z8-e8,A=z8+n8,nm=NM[z8-1];
+ $('#nt').innerHTML='<span class="nu"><sup>'+A+'</sup><sub>'+z8+'</sub></span>'+EL[z8-1][0]+'<sup>'+(q?(Math.abs(q)>1?Math.abs(q):'')+(q>0?'+':'−'):'')+'</sup>';
+ $('#ntx').textContent=nm+'-'+A+': '+z8+(z8===1?' protone, ':' protoni, ')+n8+(n8===1?' neutrone, ':' neutroni, ')+e8+(e8===1?' elettrone. ':' elettroni. ')+(n8===NN[z8-1]?'È l’isotopo più comune. ':'Isotopo meno comune: stesso elemento, massa diversa. ')+(q===0?'Atomo neutro.':q>0?'Catione: ha perso '+q+(q>1?' elettroni':' elettrone')+', carica +'+q+'.':'Anione: ha acquistato '+(-q)+(-q>1?' elettroni':' elettrone')+', carica −'+(-q)+'.')}
+$('#sz').oninput=e=>{z8=+e.target.value;n8=NN[z8-1];e8=z8;upd8()};
+$('#sn').oninput=e=>{n8=+e.target.value;upd8()};
+$('#se').oninput=e=>{e8=+e.target.value;upd8()};
+$('#pre').innerHTML=PRE.map((p,j)=>'<button class="opt" data-j="'+j+'">'+p[0]+'</button>').join('');
+$('#pre').onclick=e=>{const b=e.target.closest('button');if(b){const p=PRE[+b.dataset.j];z8=p[1];n8=p[2];e8=p[3];upd8()}};
+const g8=$('#c8').getContext('2d');
+function draw8(t){g8.clearRect(0,0,640,260);const cx=320,cy=130,P=cv('--b'),Nn=cv('--mute'),El=cv('--a'),R=[34,62,90,118];
+ g8.strokeStyle=cv('--line');g8.lineWidth=1.5;R.forEach(r=>{g8.beginPath();g8.arc(cx,cy,r,0,7);g8.stroke()});
+ const tot=z8+n8,sp=tot>20?3.8:5.4;let p=0,q=0;
+ for(let i=0;i<tot;i++){const pr=q>=n8||(p<z8&&p/z8<=q/(n8||1));pr?p++:q++;const rr=sp*Math.sqrt(i+.5),an=i*2.39996;dot(g8,cx+rr*Math.cos(an),cy+rr*Math.sin(an),sp*.88,pr?P:Nn)}
+ let left=e8;[2,8,8,8].forEach((cap,k)=>{const m=Math.min(cap,left);left-=m;for(let j=0;j<m;j++){const an=t/(1400+k*500)*(k%2?-1:1)+j*6.2832/m;dot(g8,cx+R[k]*Math.cos(an),cy+R[k]*Math.sin(an),6,El)}})}
+const h8=[0,0];
+const HI=[['Protio',0,'circa 99,98%','stabile'],['Deuterio (D)',1,'circa 0,015%','stabile'],['Trizio (T)',2,'tracce','radioattivo']];
+$('#hi').innerHTML=HI.map((h,j)=>{const A=1+h[1];return '<div class="hb"><div style="font-size:2rem"><span class="nu"><sup>'+A+'</sup><sub>1</sub></span>H</div><b>'+h[0]+'</b>'
+ +'<p class="fb" style="margin:4px 0">1 protone, '+h[1]+(h[1]===1?' neutrone':' neutroni')+', 1 elettrone<br>A − Z = '+A+' − 1 = '+h[1]+'</p>'
+ +'<p style="margin:4px 0"><span class="sw" style="background:var(--b)"></span>'+'<span class="sw" style="background:var(--mute)"></span>'.repeat(h[1])+' · <span class="sw" style="background:var(--a)"></span></p>'
+ +'<p class="fb" style="margin:4px 0 8px">'+h[2]+', '+h[3]+'</p><button class="opt" data-j="'+j+'">Vedi nell’atomo</button></div>'}).join('');
+$('#hi').onclick=e=>{const b=e.target.closest('button');if(!b)return;z8=1;n8=+b.dataset.j;e8=1;upd8();$('#vw').scrollIntoView({behavior:'smooth',block:'center'})};
+quiz('#q8b',4,{g:()=>{h8[1]=1;if(h8[0])stamp(4)},t:'Il trizio si scrive ³₁H. Quanti neutroni ha?',o:['1','2','3'],c:1,e:'Neutroni = A − Z = 3 − 1 = 2. Il numero in basso (Z = 1) dice che è sempre idrogeno; quello in alto (A = 3) conta protoni più neutroni.',h:'Il numero di massa A conta protoni e neutroni insieme: togli i protoni.'});
+quiz('#q8',4,{g:()=>{h8[0]=1;if(h8[1])stamp(4)},t:'Un atomo di sodio (Z = 11) perde un elettrone. Che cosa è diventato?',o:['Un catione Na⁺: è ancora sodio','Un isotopo del sodio','Un altro elemento'],c:0,e:'Cambia solo il numero di elettroni: Z resta 11, quindi l’elemento è ancora sodio, ma con carica +1. Se fossero cambiati i neutroni sarebbe un isotopo; se fossero cambiati i protoni, un altro elemento.',h:'Che cosa definisce l’elemento: protoni, neutroni o elettroni? E che cosa cambia quando si forma uno ione?'});
+upd8();
+quiz('#q5',5,{t:'Nella molecola d’acqua i legami O–H sono polari. Perché anche la molecola è polare?',o:['Perché è piegata, quindi le cariche parziali non si annullano','Perché contiene ioni H⁺ e O²⁻','Perché i due atomi di idrogeno si respingono'],c:0,e:'Le polarità dei due legami O–H non si compensano perché la molecola è piegata: un lato è δ− e l’altro δ+. In una molecola lineare come CO₂ le polarità si annullano e la molecola è apolare.',h:'Se i due legami O–H fossero allineati in versi opposti, cosa succederebbe alle cariche?'});
+const BL=[['Cl',3.16,'Cl',3.16],['C',2.55,'H',2.2],['H',2.2,'Cl',3.16],['O',3.44,'H',2.2],['Na',.93,'Cl',3.16]];let bi=3;
+function setB(k){bi=k;$('#bl').innerHTML=BL.map((b,j)=>'<button class="opt'+(j===k?' sel':'')+'" data-j="'+j+'">'+b[0]+'–'+b[2]+'</button>').join('')}
+$('#bl').onclick=e=>{const b=e.target.closest('button');if(b)setB(+b.dataset.j)};setB(3);
+const g5=$('#c5').getContext('2d'),g6=$('#c6').getContext('2d'),g7=$('#c7').getContext('2d');
+function draw5(t){g5.clearRect(0,0,640,185);const A=cv('--a'),B=cv('--b'),C=cv('--c'),ink=cv('--ink'),line=cv('--line'),card=cv('--card');
+ const ion=(x,y,r,c,s)=>{dot(g5,x,y,r,c);g5.fillStyle=card;g5.font='700 13px system-ui';g5.textAlign='center';g5.fillText(s,x,y+4.5)};
+ g5.strokeStyle=line;g5.lineWidth=1.5;for(let p=0;p<3;p++)g5.strokeRect(6+p*212,6,200,150);
+ for(let i=0;i<4;i++)for(let j=0;j<3;j++){const x=36+i*42,y=36+j*42;(i+j)%2?ion(x,y,11,B,'+'):ion(x,y,16,A,'−')}
+ g5.globalAlpha=.8;dot(g5,285,81,34,A);dot(g5,351,81,34,A);g5.globalAlpha=1;dot(g5,318,73,5,C);dot(g5,318,89,5,C);
+ g5.fillStyle=ink;g5.font='12px system-ui';g5.textAlign='center';g5.fillText('coppia condivisa',318,140);
+ for(let i=0;i<4;i++)for(let j=0;j<3;j++)ion(460+i*48,36+j*42,11,B,'+');
+ for(let k=0;k<12;k++)dot(g5,446+((k*53)%168)+Math.sin(t/500+k*1.7)*12,20+((k*37)%116)+Math.cos(t/600+k)*12,3.5,C);
+ g5.fillStyle=ink;g5.font='600 14px system-ui';['Ionico','Covalente','Metallico'].forEach((n,p)=>g5.fillText(n,106+p*212,176));g5.textAlign='left'}
+function draw6(){const[sa,ea,sb,eb]=BL[bi],d=Math.abs(eb-ea),dir=eb>=ea?1:-1,ionic=d>1.7;g6.clearRect(0,0,640,130);
+ const A=cv('--a'),B=cv('--b'),C=cv('--c'),ink=cv('--ink'),card=cv('--card');
+ g6.globalAlpha=.9;dot(g6,235,70,58,A);dot(g6,405,70,58,B);
+ g6.globalAlpha=.6;g6.fillStyle=C;g6.beginPath();g6.ellipse(320+dir*Math.min(d,2.3)/2.3*60,70,ionic?26:46,26,0,0,7);g6.fill();g6.globalAlpha=1;
+ g6.fillStyle=card;g6.font='700 20px system-ui';g6.textAlign='center';g6.fillText(sa,235,77);g6.fillText(sb,405,77);
+ g6.fillStyle=ink;g6.font='700 16px system-ui';
+ if(d>=.4){const hi=dir>0?405:235,lo=dir>0?235:405;g6.fillText(ionic?'−':'δ−',hi,14);g6.fillText(ionic?'+':'δ+',lo,14)}
+ g6.textAlign='left';$('#bt').textContent='ΔEN = '+d.toFixed(2).replace('.',',')+' → '+(d<.4?'legame covalente apolare':d<=1.7?'legame covalente polare':'legame ionico')}
+const hp=(x,y,r,k)=>{const dx=31.6*k,dy=24.5;return[x+dx*Math.cos(r)-dy*Math.sin(r),y+dx*Math.sin(r)+dy*Math.cos(r)]};
+function draw7(){g7.clearRect(0,0,640,190);const B=cv('--b'),C=cv('--c'),ink=cv('--ink'),mute=cv('--mute');
+ const W=(x,y,r)=>{[-1,1].forEach(k=>{const[h,v]=hp(x,y,r,k);g7.strokeStyle=ink;g7.lineWidth=2;g7.beginPath();g7.moveTo(x,y);g7.lineTo(h,v);g7.stroke();dot(g7,h,v,12,C)});dot(g7,x,y,22,B)};
+ W(130,70,0);g7.fillStyle=ink;g7.font='700 16px system-ui';g7.textAlign='center';g7.fillText('δ−',130,32);g7.fillText('δ+',98,124);g7.fillText('δ+',162,124);
+ g7.fillStyle=mute;g7.font='12px system-ui';g7.fillText('angolo circa 104,5°',130,160);
+ const M=[[390,50,.3],[530,80,2.9],[430,122,-.9]];M.forEach(m=>W(...m));
+ g7.strokeStyle=ink;g7.lineWidth=1.5;g7.setLineDash([5,4]);
+ M.forEach((m,i)=>{const n=M[(i+1)%3],hs=[-1,1].map(k=>hp(m[0],m[1],m[2],k)).sort((p,q)=>Math.hypot(p[0]-n[0],p[1]-n[1])-Math.hypot(q[0]-n[0],q[1]-n[1]))[0];g7.beginPath();g7.moveTo(hs[0],hs[1]);g7.lineTo(n[0],n[1]);g7.stroke()});
+ g7.setLineDash([]);g7.fillStyle=mute;g7.fillText('legami a idrogeno tra molecole',470,184);g7.textAlign='left'}
+let T3=null;
+const M3=['Molecola d’acqua','Con cariche parziali','Cristallo di NaCl'],D3=['Molecola d’acqua: l’ossigeno al centro e due idrogeni, con un angolo di circa 104,5°.','Nuvola verde acqua: densità di carica negativa (δ−) attorno all’ossigeno. Nuvole ambra: densità positiva (δ+) attorno agli idrogeni. Un lato della molecola è positivo, l’altro negativo.','Cristallo di NaCl: gli ioni Na⁺ (piccoli, corallo) e Cl⁻ (grandi, verde acqua) si alternano in tutte le direzioni. Nel cristallo ogni ione è circondato da 6 ioni di carica opposta.'];
+function init3(){try{if(typeof THREE==='undefined')throw 0;const el=$('#v3'),w=el.clientWidth||640,r=new THREE.WebGLRenderer({antialias:true,alpha:true});
+ r.setPixelRatio(Math.min(window.devicePixelRatio||1,2));r.setSize(w,320);el.appendChild(r.domElement);
+ const sc=new THREE.Scene(),cam=new THREE.PerspectiveCamera(40,w/320,.1,100);cam.position.set(0,0,8);
+ sc.add(new THREE.AmbientLight(0xffffff,.75));const dl=new THREE.DirectionalLight(0xffffff,.8);dl.position.set(3,4,5);sc.add(dl);
+ const grp=new THREE.Group();sc.add(grp);T3={r,sc,cam,grp,el,rx:.3,ry:.5,drag:false,m:-1,w};
+ let lx=0,ly=0;el.addEventListener('pointerdown',e=>{T3.drag=true;lx=e.clientX;ly=e.clientY;el.setPointerCapture(e.pointerId)});
+ el.addEventListener('pointermove',e=>{if(!T3.drag)return;T3.ry+=(e.clientX-lx)*.01;T3.rx+=(e.clientY-ly)*.01;lx=e.clientX;ly=e.clientY});
+ ['pointerup','pointercancel'].forEach(n=>el.addEventListener(n,()=>{T3.drag=false}));set3(1)}
+ catch(err){T3={fail:1};$('#d3d').textContent='Il 3D non è disponibile su questo dispositivo: usa i disegni qui sopra.'}}
+function set3(m){if(!T3||T3.fail)return;T3.m=m;const g=T3.grp;while(g.children.length)g.remove(g.children[0]);
+ $('#m3').innerHTML=M3.map((n,j)=>'<button class="opt'+(j===m?' sel':'')+'" data-j="'+j+'">'+n+'</button>').join('');$('#d3d').textContent=D3[m];
+ const col=n=>new THREE.Color(cv(n)),sph=(r,c,op)=>new THREE.Mesh(new THREE.SphereGeometry(r,32,24),new THREE.MeshStandardMaterial({color:c,roughness:.45,transparent:op<1,opacity:op}));
+ if(m<2){g.scale.setScalar(1.6);g.add(sph(.62,col('--b'),1));
+  [[.79,-.613,0],[-.79,-.613,0]].forEach(p=>{const h=sph(.36,col('--c'),1);h.position.set(p[0],p[1],p[2]);g.add(h);
+   const L=Math.hypot(p[0],p[1],p[2]),cy=new THREE.Mesh(new THREE.CylinderGeometry(.07,.07,L,12),new THREE.MeshStandardMaterial({color:0x888888}));
+   cy.position.set(p[0]/2,p[1]/2,0);cy.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),new THREE.Vector3(p[0],p[1],p[2]).normalize());g.add(cy);
+   if(m===1){const c=sph(.62,col('--c'),.28);c.position.set(p[0],p[1],p[2]);g.add(c)}});
+  if(m===1){const c=sph(1.05,col('--a'),.28);c.position.set(0,.2,0);g.add(c)}}
+ else{g.scale.setScalar(1);for(let i=-1;i<=1;i++)for(let j=-1;j<=1;j++)for(let k=-1;k<=1;k++){const cl=Math.abs(i+j+k)%2===0,s=sph(cl?.4:.24,col(cl?'--a':'--b'),1);s.position.set(i,j,k);g.add(s)}}}
+$('#m3').onclick=e=>{const b=e.target.closest('button');if(b)set3(+b.dataset.j)};
+function draw3d(t){if(!T3){init3();return}if(T3.fail)return;const w=T3.el.clientWidth;
+ if(w&&w!==T3.w){T3.w=w;T3.r.setSize(w,320);T3.cam.aspect=w/320;T3.cam.updateProjectionMatrix()}
+ if(!T3.drag)T3.ry+=.004;T3.grp.rotation.set(T3.rx,T3.ry,0);T3.r.render(T3.sc,T3.cam)}
+var T8=null,v8=0;
+function setV8(m){v8=m;$('#c8').style.display=m?'none':'block';$('#v8').style.display=m?'block':'none';
+ $('#vw').innerHTML=['Disegno 2D','Atomo in 3D'].map((n,j)=>'<button class="opt'+(j===m?' sel':'')+'" data-j="'+j+'">'+n+'</button>').join('');
+ if(!(T8&&T8.fail))$('#vm8').textContent=m?'Il nucleo (protoni e neutroni) è al centro; gli elettroni occupano gusci sferici attorno. Trascina per ruotare. Non in scala.':''}
+$('#vw').onclick=e=>{const b=e.target.closest('button');if(b)setV8(+b.dataset.j)};setV8(0);
+function init8(){try{if(typeof THREE==='undefined')throw 0;const el=$('#v8'),w=el.clientWidth||640,r=new THREE.WebGLRenderer({antialias:true,alpha:true});
+ r.setPixelRatio(Math.min(window.devicePixelRatio||1,2));r.setSize(w,320);el.appendChild(r.domElement);
+ const sc=new THREE.Scene(),cam=new THREE.PerspectiveCamera(40,w/320,.1,100);cam.position.set(0,0,13);
+ sc.add(new THREE.AmbientLight(0xffffff,.75));const dl=new THREE.DirectionalLight(0xffffff,.8);dl.position.set(3,4,5);sc.add(dl);
+ const grp=new THREE.Group();sc.add(grp);T8={r,sc,cam,grp,el,rx:.4,ry:.5,drag:false,w,sh:[]};
+ let lx=0,ly=0;el.addEventListener('pointerdown',e=>{T8.drag=true;lx=e.clientX;ly=e.clientY;el.setPointerCapture(e.pointerId)});
+ el.addEventListener('pointermove',e=>{if(!T8.drag)return;T8.ry+=(e.clientX-lx)*.01;T8.rx+=(e.clientY-ly)*.01;lx=e.clientX;ly=e.clientY});
+ ['pointerup','pointercancel'].forEach(n=>el.addEventListener(n,()=>{T8.drag=false}));build8()}
+ catch(err){T8={fail:1};$('#vm8').textContent='Il 3D non è disponibile su questo dispositivo: usa il disegno 2D.';setV8(0)}}
+function build8(){if(!T8||T8.fail)return;const g=T8.grp;while(g.children.length)g.remove(g.children[0]);T8.sh=[];
+ const col=n=>new THREE.Color(cv(n)),mat=(n,op)=>new THREE.MeshStandardMaterial({color:col(n),roughness:.45,transparent:!!op,opacity:op||1}),geo=r=>new THREE.SphereGeometry(r,16,12),ga=Math.PI*(3-Math.sqrt(5));
+ const tot=z8+n8,pr=.2,Rn=pr*1.3*Math.cbrt(Math.max(tot,1)),nuc=new THREE.Group(),gp=geo(pr),mp=mat('--b'),mn=mat('--mute');g.add(nuc);
+ let p=0,q=0;for(let i=0;i<tot;i++){const pt=q>=n8||(p<z8&&p/z8<=q/(n8||1));pt?p++:q++;
+  const y=1-2*(i+.5)/tot,rr=Math.sqrt(1-y*y),th=i*ga,k=Rn*Math.cbrt((i+.5)/tot),m=new THREE.Mesh(gp,pt?mp:mn);
+  m.position.set(Math.cos(th)*rr*k,y*k,Math.sin(th)*rr*k);if(tot===1)m.position.set(0,0,0);nuc.add(m)}
+ let left=e8;const ge=geo(.13),me=mat('--a');
+ [2,8,8,8].forEach((cap,k)=>{const m=Math.min(cap,left);left-=m;if(!m)return;const sg=new THREE.Group(),R=1.6+k*.95;
+  for(let j=0;j<m;j++){const y=m===1?0:1-2*(j+.5)/m,rr=Math.sqrt(1-y*y),th=j*ga+k,e=new THREE.Mesh(ge,me);e.position.set(Math.cos(th)*rr*R,y*R,Math.sin(th)*rr*R);sg.add(e)}
+  sg.add(new THREE.Mesh(new THREE.SphereGeometry(R,24,16),mat('--a',.06)));g.add(sg);T8.sh.push(sg)})}
+function draw8d(t){if(!T8){init8();return}if(T8.fail)return;const w=T8.el.clientWidth;
+ if(w&&w!==T8.w){T8.w=w;T8.r.setSize(w,320);T8.cam.aspect=w/320;T8.cam.updateProjectionMatrix()}
+ if(!T8.drag)T8.ry+=.004;T8.grp.rotation.set(T8.rx,T8.ry,0);T8.sh.forEach((s,k)=>{s.rotation.y=t/(1500+k*700)*(k%2?-1:1);s.rotation.x=t/(2500+k*900)});T8.r.render(T8.sc,T8.cam)}
+(function loop(t){try{if(cur===5){draw5(t);draw6();draw7();draw3d(t)}if(cur===4){v8?draw8d(t):draw8(t)}if(cur===0)draw1(t);if(cur===1)draw2();if(cur===2)draw3(t)}catch(e){console.error(e)}requestAnimationFrame(loop)})(0);
+</script></body></html>
